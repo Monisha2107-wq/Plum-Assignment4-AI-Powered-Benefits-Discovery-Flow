@@ -250,7 +250,7 @@ const BenefitDetailScreen = () => {
     if (!selectedBenefit) return;
     setIsPlanLoading(true);
     try {
-      const plan = await generateActionPlan(selectedBenefit.title);
+      const plan = await generateActionPlan(selectedBenefit);
       setActionPlan(plan);
     } catch (error) {
       console.error("Error generating action plan:", error);

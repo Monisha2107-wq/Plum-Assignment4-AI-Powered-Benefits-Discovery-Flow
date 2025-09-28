@@ -5,18 +5,16 @@ import { benefitsData } from "../constants/mockBenefits";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  Star,
   Shield,
-  Clock,
   CheckCircle,
   RefreshCw,
   AlertCircle,
+  HelpCircle,
 } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useTheme } from "../context/ThemeContext";
 
-// --- Themed Styled Components ---
 const PageContainer = styled.div`
   min-height: 100vh;
   display: flex;
@@ -69,12 +67,6 @@ const CategoryBadge = styled.div`
   border: 1px solid ${(props) => props.$themeColors.border};
 `;
 
-const ResultsCount = styled.div`
-  color: ${(props) => props.$themeColors.textSecondary};
-  font-size: 0.9rem;
-  margin-bottom: 2rem;
-`;
-
 const CardGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -105,21 +97,20 @@ const BenefitCard = styled(Link)`
   }
 `;
 
-const ErrorContainer = styled.div`
+const StateContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
   padding: 4rem 2rem;
-  background: ${(props) => props.$themeColors.dangerBg};
-  border: 1px solid ${(props) => props.$themeColors.dangerBorder};
+  background: ${(props) => props.$themeColors.card};
+  border: 1px solid ${(props) => props.$themeColors.border};
   border-radius: 12px;
   margin: 2rem 0;
 `;
 
-const ErrorIcon = styled.div`
-  background: ${(props) => props.$themeColors.danger};
+const StateIcon = styled.div`
   color: white;
   border-radius: 50%;
   width: 64px;
@@ -128,28 +119,29 @@ const ErrorIcon = styled.div`
   align-items: center;
   justify-content: center;
   margin-bottom: 1.5rem;
+  background: ${(props) => props.$iconBg || props.$themeColors.danger};
 `;
 
-const ErrorTitle = styled.h2`
+const StateTitle = styled.h2`
   font-size: 1.5rem;
   font-weight: 600;
-  color: ${(props) => props.$themeColors.danger};
+  color: ${(props) => props.$themeColors.text};
   margin-bottom: 1rem;
 `;
 
-const ErrorMessage = styled.p`
-  color: ${(props) => props.$themeColors.dangerText};
+const StateMessage = styled.p`
+  color: ${(props) => props.$themeColors.textSecondary};
   line-height: 1.6;
   margin-bottom: 2rem;
   max-width: 500px;
 `;
 
-const RetryButton = styled(Link)`
+const HomeButton = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: ${(props) => props.$themeColors.danger};
-  color: white;
+  background: ${(props) => props.$themeColors.primary};
+  color: ${(props) => props.$themeColors.card};
   border: none;
   border-radius: 8px;
   padding: 0.75rem 1.5rem;
@@ -158,7 +150,7 @@ const RetryButton = styled(Link)`
   transition: background 0.2s;
 
   &:hover {
-    background: ${(props) => props.$themeColors.dangerHover};
+    background: ${(props) => props.$themeColors.primaryHover};
   }
 `;
 
@@ -213,15 +205,20 @@ const BenefitsListScreen = () => {
   const { category, setSelectedBenefit } = useContext(AppContext);
   const { themeColors } = useTheme();
   const [filteredBenefits, setFilteredBenefits] = useState([]);
-  const [isServiceDown, setIsServiceDown] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isNill, setIsNill] = useState(false);
 
   useEffect(() => {
+    setIsError(false);
+    setIsNill(false);
+    setFilteredBenefits([]);
+
     if (category) {
-      if (category === "NILL") {
-        setIsServiceDown(true);
-        setFilteredBenefits([]);
+      if (category === "ERROR") {
+        setIsError(true);
+      } else if (category === "NILL") {
+        setIsNill(true);
       } else {
-        setIsServiceDown(false);
         const results = benefitsData.filter(
           (benefit) => benefit.category === category
         );
@@ -234,27 +231,55 @@ const BenefitsListScreen = () => {
     setSelectedBenefit(benefit);
   };
 
-  if (isServiceDown) {
+  if (isError) {
     return (
       <PageContainer $themeColors={themeColors}>
         <Navbar />
         <MainContent>
-          <ErrorContainer $themeColors={themeColors}>
-            <ErrorIcon $themeColors={themeColors}>
+          <StateContainer $themeColors={themeColors}>
+            <StateIcon $themeColors={themeColors} $iconBg={themeColors.danger}>
               <AlertCircle size={32} />
-            </ErrorIcon>
-            <ErrorTitle $themeColors={themeColors}>
+            </StateIcon>
+            <StateTitle $themeColors={themeColors}>
               Service Temporarily Unavailable
-            </ErrorTitle>
-            <ErrorMessage $themeColors={themeColors}>
+            </StateTitle>
+            <StateMessage $themeColors={themeColors}>
               Our AI classification service is currently experiencing issues.
               Please try again later or contact support if the problem persists.
-            </ErrorMessage>
-            <RetryButton to="/" $themeColors={themeColors}>
+            </StateMessage>
+            <HomeButton to="/" $themeColors={themeColors}>
               <RefreshCw size={16} />
               Return to Home
-            </RetryButton>
-          </ErrorContainer>
+            </HomeButton>
+          </StateContainer>
+        </MainContent>
+        <Footer />
+      </PageContainer>
+    );
+  }
+
+  if (isNill) {
+    return (
+      <PageContainer $themeColors={themeColors}>
+        <Navbar />
+        <MainContent>
+          <StateContainer $themeColors={themeColors}>
+            <StateIcon $themeColors={themeColors} $iconBg={themeColors.accent}>
+              <HelpCircle size={32} />
+            </StateIcon>
+            <StateTitle $themeColors={themeColors}>
+              Could Not Find Relevant Benefits
+            </StateTitle>
+            <StateMessage $themeColors={themeColors}>
+              Your request didn't seem to be related to a health concern. Please
+              try again with a clearer, health-related query to find the
+              benefits you need.
+            </StateMessage>
+            <HomeButton to="/" $themeColors={themeColors}>
+              <RefreshCw size={16} />
+              Try Another Search
+            </HomeButton>
+          </StateContainer>
         </MainContent>
         <Footer />
       </PageContainer>

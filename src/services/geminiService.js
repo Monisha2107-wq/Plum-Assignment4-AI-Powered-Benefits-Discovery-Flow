@@ -20,10 +20,8 @@ CATEGORY DEFINITIONS:
 USER QUERY: "${userInput}"
 
 INSTRUCTIONS:
-- Return ONLY the single most relevant category name from the four options above
+- Return ONLY the single most relevant category name OR the word "NILL".
 - Do not add any explanations, punctuation, or additional text
-- If the query could fit multiple categories, choose the most specific one
-- For general health concerns without specific symptoms, default to "OPD"
 
 CATEGORY:`;
 
@@ -40,7 +38,7 @@ CATEGORY:`;
     }
   } catch (error) {
     console.error("Error classifying benefit category:", error);
-    return "OPD";
+    return "ERROR";
   }
 };
 
